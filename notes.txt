@@ -1,0 +1,196 @@
+Background:
+
+Commutative Matrices := Two matrices A,B commute if AB = BA
+Hermitian Matrix     := Self-Adjoint Matrix := square matrix A st A^H = A
+    -A^H is the conjugate transpose of A or the 'hermitian tranpose of A'
+
+Normal Matrix := complex square matrix st U^H*U = U*U^H
+    -normal matrices commute with their conjugate transpose
+    Subset of Normal Matrices:
+        Unitary Matrix    := complex square matrix st U^H*U = U*U^H = I
+        Orthogonal Matrix := real square matrix    st U^T*U = U*U^T = I
+
+Characteristic Polynomial of a square matrix A: p_a(x) = det(A-xI)
+Minimal Polynomial of a square matrix A: m_a(x) = polynomial of least degree
+    such that m_a(A) = 0
+
+When does characteristic = minimal?
+    When all eigenvalues distinct <-> charact. polyn only has simple roots
+
+Theorem 0: If - BA==AB
+ [1]            &                   ===>   B = h(A) where h is a polynomial of deg(m_a(x))
+            - A's has dist eigvals
+
+Theorem 1: If A diagonalizable ===> any polynomial h(A) can be written as
+                                  h(A) = V * diag(h(l_0) ,..., h(l_N-1)) * V^-1
+                                  where - l_i is eigenvalue of A
+                                        - V is matrix of eigvec's of A
+
+Theorem 2:
+    Let A=VUV^-1 be a diagonalizable matrix
+    Let H=h(A) be some polynomial of A
+    Then H has same eigenvectors as A.
+pf:
+    H = h(A) = h(VUV^-1) = Vh(U)V^-1,
+    where h(U) = diag(h(l0),h(l1)...) where li are eigevalues of A
+
+
+Remark: Unitary Diagonalizable vs Diagonalizable
+    - Diagonalizable         := A = VUV^-1
+    - Unitary Diagonalizable := A = VUV^H
+
+If A is Normal ==> There exists complete set of orthonormal eigenvectors
+               ==> A is Unitarily Diagonalizable
+               ==> A = VUV^H
+[2]
+
+[1] https://en.wikipedia.org/wiki/Commuting_matrices
+[2] https://math.stackexchange.com/questions/778946/prove-that-if-a-is-normal-then-eigenvectors-corresponding-to-distinct-eigenva
+
+
+
+Question:
+What breaks down when a vertex basis is chosen which is no the graph fourier basis = eigvecs of A
+
+Show A is local operation on s -> H = h(A) can be impleneted in vertex domain
+ - do when dont want to take eigendecomp of A
+
+Notes:
+
+Outline:
+    1: review concept of shift in DSP
+    2: develop corresponding notion of shift for GSP
+    3: this leads to defn of frequencies for graph signals and their interpretations
+
+1:
+    Recall: DSP studies
+    a) signals and their representations
+    b) systems that process signals, usually referred to as filters
+    c) signal transforms, including two very important ones, namely, the z-transform and the Fourier transform
+    d) sampling of signals, as well as other more specialized topics.
+
+    restrict ourselves to finite signals, FIR filters
+
+    signals:
+        s = (s_0,s_1,...,s_N-1)
+        z transform of s : s(z) = sum s[i]*z^-i, i = 0->N-1
+        DFT of s:      s_hat[k] = <s,e_k,N>, where e_kn is complex exponential with freq 2*pi*k/N
+        iDFT of s_hat: s = sum s_hat[i]*(e_i,N), i = 0->N-1
+    filters: An FIR filter is also represented by a polynomial in z^−1 ('shifts' or 'delays')
+        h = sum h_n*z^-n, n:0->N-1, h_n in R
+        s_out(t) = conv( h(t) , s_in(t) )
+        s_out(z) =       h(z) * s_in(z)
+
+        Only considering finite time signals
+        -> h(z) * s_in(z) could result in s_out(z) being a polynomial in z−1 of degree greater than N − 1
+        -> we have to consider bound- ary conditions (b.c.).
+        -> for simplicity, we consider periodic extensions of the signal,
+            > sn = s_(n % N) . In other words, the real line is folded around the circle.
+
+        prop 1) filters are polynomials in the shift z^-1
+        prop 2) shift invariance (the shift is commutative with the filter)
+            -because filters are polynomials in the shift: z^-1 * h(z) = h(z) * z^-1
+            "delaying the input signal s_in and then filtering the delayed input signal leads to the same signal
+              as first filtering the input signal sin and then delaying the filtered output."
+
+        ** Highlights:
+            1) represent signals by (finite degree) polynomials in z^−1
+            2) and build filters also as polynomials in z^−1.
+
+2: Defining shifts in Graph Signal Processing
+    signal now vector s, filter now matrix H
+    In particular, the ~~shift filtering operation corresponds to multiplication by a circulant matrix Ac~~
+    A graph interpretation for the DSP concepts of Section II-A can be achieved by viewing the 0-1 shift matrix
+        Ac as the adjacency matrix of a graph
+    **Dual role of the matrix Ac: represents both the
+        1) shift z^−1 in DSP and
+        2) the adjacency matrix of the associated time graph
+    Thus this circulant case acts as the foundation on which to generalize DSP concepts
+        -for regular DSP Ac simply acts as the shift
+        -for GSP Ac is interpreted as the adj matrix of the graph on which the signal lives
+    More evidence that this is a good idea:
+        -taking the eigendecomp of Ac: Ac = VUV^-1 gives us the standard fourier basis as eigenvectors!
+        -the classical fourier transform is simply V^-1!!!!!
+
+    Thus interpret the Adjacency Matrix of a graph signal as the 'shift'
+
+    Lets try to define filters to satisfy the 2 properties above: shift invariance and polynomial filters
+        We restrict ourselves to matrices H which commute with the shift(adj matrix)
+            -> HA=AH
+        Theorem: Let A have N distinct eigenvectors and let V be an NxN matrix with its columns as A's
+                 eigenvectors. Let H <- V * diag(b0,b1,...,bN-1) * V^-1. Then H commutes with A.
+        pf: HA = V diag(b0*l0, b1*l1,...,bN-1*lN-1) V^-1 = AH, where li's are eigenvalues of A. QED.
+
+        To implement a filter in node space, solve system of equations:
+            h(l0) = b0, h(l1) = b1,..., h(lN-1) = bN-1, where h is the polynomial in H=h(A).
+            Then s_out = H*s_in = (h0 + h1*A + h2*A^2 + ... + hN-1*A^N-1)*s_in
+
+        Theorem 0 (from background):
+            If AH==HA && pa(z)==ma(z) THEN H=h(A)
+                -where h is a polynomial of at most deg(ma(z))
+        Note: all eigenvalues distinct --> pa(z)==ma(z)
+
+        For simplicity: in this discussion we assume A has N distinct eigenvalues and hence a complete
+                        set of eigenvectors
+
+    Frequency representations for graph signals
+        In DSP and in linear systems, interested in signals that are invariant when processed by a
+            (linear) filter ( h·sin = αsin, where α is a scalar). Theses sin are the eigensignals
+            of the filter h. These sin are complex exponentions. We refer to this as the invarience property
+            of complex exponentials wrt linear systems.
+        In GSP filters are matrices -> eigensignals are eigenvectors. By Theorem 2 in background, the
+            eigensignals (eigenfunctions) are the eigenvectors of the shift (adj matrix) A. Thus eigenvectors
+            of A are invariant wrt graph filters (Hv = αv).
+        Graph Fourier Transforms
+            Generalize from the eigendecomp of Ac: Ac = VUV^-1
+            It happens to be that V = DFT^-1, U = diag(eigenvals of Ac), V^-1 = DFT
+            where the columns of DFT are the complex exponentials (the classic fourier basis!).
+
+            Thus define the Graph Fourier Transform F := V^-1, where A=VUV^-1
+                eigenvectors of shift A <- 'graph spectral components'
+                eigenvalues of shift A  <- 'graph frequencies'
+
+            Fourier Analysis:  s_hat = Fs = V^-1*s
+            Fourier Synthesis: s     = F^-1*s_hat = V*s_hat = sum <vi,s>*vi, i=0->N-1
+
+    Interpreting Graph Frequencies
+        We can now interpret filtering a graph signal:
+            s_filtered = Hs
+                       = V*diag(b0,..bN-1)*V^-1*s                <- graph fourier transform
+                       = V*diag(b0,..bN-1)*s_hat                 <- filtering in graph Fourier space
+                       = V*diag(b0*s_hat[0],...,bN-1*s_hat[N-1]) <- inverse fourier transform takes
+                                                                     us back to graph node domain
+
+        In DSP (time domain):
+            Frequencies are DEFINED from the eigenvalues of the cyclic shift Ac
+            f_k := ln(eigval_k) / (-2pi*j)        <- 2017 version includes, 2018 does not
+                 = ln(exp(-2pi*j*k/N)) / (-2pi*j)
+                 = 2*pi*k/N,    k = 0->N-1.
+            ^ directly related to the degree of variation of the spectral
+                components (complex exponentials)
+            nice one-to-one correspondence between the ordered value of the frequency and the
+                corresponding degree of variation or complexity of the time spectral component.
+        In GSP:
+            Frequencies are DEFINED by the eigenvalues of the shift
+            We lose the nice ordering that exists in the time domain. the magnitude ||eigenvalue||
+                does NOT correspond to the variation of the corresponding spectral component (eigenvector)
+            Thus we create a metric to order them apppropriately ==> Total Variation
+                Total Variation can be defined a few ways
+                ex) TV(v_k) := || v_k - A_norm*v_k || where ||-|| is the L1 norm, A_norm <- 1/(eigval_max)*A
+                Then using the TV of each eigenvector, we sort the corresponding eigenvalues ('graph frequencies')
+                Thus graph frequency lm is larger than graph frequency li if TV(vm)>TV(li)
+            Once we create this ordering ^, the definitions of low-band-high pass filters become trivial
+
+
+
+
+"In particular, the graph Fourier transform allows us to develop the intuition gathered in the classical setting and extend it to graphs; we can talk about the notions of frequency and bandlimitedness, for example."
+
+"The machine learning community also con- siders graph structure/data and at times, uses similar methods as GSP does. For example, the graph Fourier basis is related to Laplacian eigenvectors and graph signal recovery is related to semi-supervised learning with graphs[5]. There are, however, a few differences.
+    (1) GSP defines a framework that allows the extension of classical signal processing concepts
+    (2) Sampling data associated with graphs is rarely studied in the machine learning community and the sampling problem on graphs is generally a hard one; graph-structured data representations (such as graph filter banks and graph dictionary learning) are also rarely studied in the machine learning community;
+    (3) Given that GSP extends classical signal processing concepts, it is in a position to consider low-level processing such as denoising, inpainting and compression; and
+    (4) Machine learning typically considers a graph as a discrete version of a manifold. In many real-world applications that are associated with graphs, this assumption is however not true. On the contrary, GSP does not make this assumption. For example, there is no underlying manifold for online social networks."
+
+"...GSP has strong connections to several theoretical and practical research domains; its promise lies in its ability to develop new tools and approach existing problems from different perspectives."
+
