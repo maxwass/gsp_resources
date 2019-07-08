@@ -58,12 +58,12 @@ Show A is local operation on s -> H = h(A) can be impleneted in vertex domain
 Notes:
 
 Outline:
-    1: review concept of shift in DSP
-    2: develop corresponding notion of shift for GSP
-    3: this leads to defn of frequencies for graph signals and their interpretations
+    -review concept of shift in DSP
+    -develop corresponding notion of shift for GSP
+    -this leads to defn of frequencies for graph signals and their interpretations
 
-1:
-    Recall: DSP studies
+2: KEY INGREDIENTS OF GRAPH SIGNAL PROCESSING
+A) Recall: DSP investigates...
     a) signals and their representations
     b) systems that process signals, usually referred to as filters
     c) signal transforms, including two very important ones, namely, the z-transform and the Fourier transform
@@ -97,7 +97,7 @@ Outline:
             1) represent signals by (finite degree) polynomials in z^−1
             2) and build filters also as polynomials in z^−1.
 
-2: Defining shifts in Graph Signal Processing
+B) Defining shifts in Graph Signal Processing
     signal now vector s, filter now matrix H
     In particular, the ~~shift filtering operation corresponds to multiplication by a circulant matrix Ac~~
     A graph interpretation for the DSP concepts of Section II-A can be achieved by viewing the 0-1 shift matrix
@@ -133,56 +133,224 @@ Outline:
         For simplicity: in this discussion we assume A has N distinct eigenvalues and hence a complete
                         set of eigenvectors
 
-    Frequency representations for graph signals
-        In DSP and in linear systems, interested in signals that are invariant when processed by a
-            (linear) filter ( h·sin = αsin, where α is a scalar). Theses sin are the eigensignals
-            of the filter h. These sin are complex exponentions. We refer to this as the invarience property
-            of complex exponentials wrt linear systems.
-        In GSP filters are matrices -> eigensignals are eigenvectors. By Theorem 2 in background, the
-            eigensignals (eigenfunctions) are the eigenvectors of the shift (adj matrix) A. Thus eigenvectors
-            of A are invariant wrt graph filters (Hv = αv).
-        Graph Fourier Transforms
-            Generalize from the eigendecomp of Ac: Ac = VUV^-1
-            It happens to be that V = DFT^-1, U = diag(eigenvals of Ac), V^-1 = DFT
-            where the columns of DFT are the complex exponentials (the classic fourier basis!).
+C) Frequency representations for graph signals
+    In DSP and in linear systems, interested in signals that are invariant when processed by a
+        (linear) filter ( h·sin = αsin, where α is a scalar). Theses sin are the eigensignals
+        of the filter h. These sin are complex exponentions. We refer to this as the invarience property
+        of complex exponentials wrt linear systems.
+    In GSP filters are matrices -> eigensignals are eigenvectors. By Theorem 2 in background, the
+        eigensignals (eigenfunctions) are the eigenvectors of the shift (adj matrix) A. Thus eigenvectors
+        of A are invariant wrt graph filters (Hv = αv).
+    Graph Fourier Transforms
+        Generalize from the eigendecomp of Ac: Ac = VUV^-1
+        It happens to be that V = DFT^-1, U = diag(eigenvals of Ac), V^-1 = DFT
+        where the columns of DFT are the complex exponentials (the classic fourier basis!).
 
-            Thus define the Graph Fourier Transform F := V^-1, where A=VUV^-1
-                eigenvectors of shift A <- 'graph spectral components'
-                eigenvalues of shift A  <- 'graph frequencies'
+        Thus define the Graph Fourier Transform F := V^-1, where A=VUV^-1
+            eigenvectors of shift A <- 'graph spectral components'
+            eigenvalues of shift A  <- 'graph frequencies'
 
-            Fourier Analysis:  s_hat = Fs = V^-1*s
-            Fourier Synthesis: s     = F^-1*s_hat = V*s_hat = sum <vi,s>*vi, i=0->N-1
+        Fourier Analysis:  s_hat = Fs = V^-1*s
+        Fourier Synthesis: s     = F^-1*s_hat = V*s_hat = sum <vi,s>*vi, i=0->N-1
 
-    Interpreting Graph Frequencies
-        We can now interpret filtering a graph signal:
-            s_filtered = Hs
-                       = V*diag(b0,..bN-1)*V^-1*s                <- graph fourier transform
-                       = V*diag(b0,..bN-1)*s_hat                 <- filtering in graph Fourier space
-                       = V*diag(b0*s_hat[0],...,bN-1*s_hat[N-1]) <- inverse fourier transform takes
-                                                                     us back to graph node domain
+D) Interpreting Graph Frequencies
+    We can now interpret filtering a graph signal:
+        s_filtered = Hs
+                   = V*diag(b0,..bN-1)*V^-1*s                <- graph fourier transform
+                   = V*diag(b0,..bN-1)*s_hat                 <- filtering in graph Fourier space
+                   = V*diag(b0*s_hat[0],...,bN-1*s_hat[N-1]) <- inverse fourier transform takes
+                                                                 us back to graph node domain
 
-        In DSP (time domain):
-            Frequencies are DEFINED from the eigenvalues of the cyclic shift Ac
-            f_k := ln(eigval_k) / (-2pi*j)        <- 2017 version includes, 2018 does not
-                 = ln(exp(-2pi*j*k/N)) / (-2pi*j)
-                 = 2*pi*k/N,    k = 0->N-1.
-            ^ directly related to the degree of variation of the spectral
-                components (complex exponentials)
-            nice one-to-one correspondence between the ordered value of the frequency and the
-                corresponding degree of variation or complexity of the time spectral component.
-        In GSP:
-            Frequencies are DEFINED by the eigenvalues of the shift
-            We lose the nice ordering that exists in the time domain. the magnitude ||eigenvalue||
-                does NOT correspond to the variation of the corresponding spectral component (eigenvector)
-            Thus we create a metric to order them apppropriately ==> Total Variation
-                Total Variation can be defined a few ways
-                ex) TV(v_k) := || v_k - A_norm*v_k || where ||-|| is the L1 norm, A_norm <- 1/(eigval_max)*A
-                Then using the TV of each eigenvector, we sort the corresponding eigenvalues ('graph frequencies')
-                Thus graph frequency lm is larger than graph frequency li if TV(vm)>TV(li)
-            Once we create this ordering ^, the definitions of low-band-high pass filters become trivial
+    In DSP (time domain):
+        Frequencies are DEFINED from the eigenvalues of the cyclic shift Ac
+        f_k := ln(eigval_k) / (-2pi*j)        <- 2017 version includes, 2018 does not
+             = ln(exp(-2pi*j*k/N)) / (-2pi*j)
+             = 2*pi*k/N,    k = 0->N-1.
+        ^ directly related to the degree of variation of the spectral
+            components (complex exponentials)
+        nice one-to-one correspondence between the ordered value of the frequency and the
+            corresponding degree of variation or complexity of the time spectral component.
+    In GSP:
+        Frequencies are DEFINED by the eigenvalues of the shift
+        Frequencies can be complex -> no natural ordering like real numbers
+        We lose the nice ordering that exists in the time domain. the magnitude ||eigenvalue||
+            does NOT correspond to the variation of the corresponding spectral component (eigenvector)
+        Thus we create a metric to order them apppropriately ==> Total Variation
+            Total Variation can be defined a few ways
+            ex) TV(v_k) := || v_k - A_norm*v_k || where ||-|| is the L1 norm, A_norm <- 1/(eigval_max)*A
+            Then using the TV of each eigenvector, we sort the corresponding eigenvalues ('graph frequencies')
+            Thus graph frequency lm is larger than graph frequency li if TV(vm)>TV(li)
+        Once we create this ordering ^, the definitions of low-band-high pass filters become trivial
+
+
+E) Frequency representations based on the Laplacian
+    We can do the same things using the Laplacian on an undirected graph
+    Lalacian is positive semidefinite ==> - all eigenvalues are real & nonnegative
+                                          - complete set of orthogonal eigenvectors
+    B/c eigenvals are real -> provide natural ordering to their associated eigenvectors
+                              in terms of frequency (variation of values over graph)
+    We can view the eigenvalue/eigenvector pair as successive optimizers of Rayleigh quotient
+        where the kth pair (l_k,u_k) is the solution to:
+            argmin x^T*L*x
+            -for ||x||=1 in Rn
+            -x orthog to previous solns u_0,...,u_k-1
+
+        Thus the kth eigenvalue can be interpreted as the ith graph frequency corresponding
+            to the eigenvector u_k
+
+F) Implementation
+    How to implement graph filters?
+    1) Follow the definition: H = V diag(b0,...,bN-1) V^-1
+        Input: b0,...,bN-1 wieghts to scale graph freq's
+         i) compute SVD of A to get V                O(N^3)
+        ii) explicitly apply to input signal s_in    O(N^3)
+            ->s_out = V diag(b0,...,bN-1) V^-1 s_in -------
+                                                     O(N^3)
+
+    2) Partial SVD can also be used if the filter h should only be eval'd on top/bottom eigenvals
+    For large graphs, better to avoid even partial SVD
+    3) Chebyshev approx to H -> plug in power of A into approx -> avoid SVD altogher
+        -Does NOT require knowing the eigenvalues and eigenvectors associated to the graph A
+        -This also allows us to implement the filter locally
+            -A   is a 1 hop operation <-> s_out is weighted sum of nieghbors
+            -A^2 is a 2 hop operation <-> s_out is a weighted sum of vertices that are its
+                                           neighbors or its neighbors nieghbors
+            -A^i is a k hop operation <-> ....
+        -Thus, we can traverse the graph vertex-by-vertex, and compute filtered output with only
+            accesing its k-hop neighborhood. This is necesessary for VERY large graphs.
+
+3) STATE-OF-THE-ART AND CHALLENGES
+
+A) Frequency Defn
+    For Undirected Graphs, guarunteed existance of orthogonal basis.
+        Once graph is fixed, frequency is a function of
+             i) selected shift operator and its normalization
+            ii) etc...
+        Making choice appropriately is open research question
+        ex^) Suppose the there is high multiplicity of eigenvalues of shift (adj or laplacian)
+              -Graph of N nodes has < N unique frequencies
+              -Problem: can choose any set of orthogonal vectors within the subspace
+                        corresponding to this frequency, leading to different GFTs
+                        and thus potentially irreproducible results
+              -Soln: Open problem. Proposed soln in paper.
+    For Directed Graphs, full set of eigenvectors may not even exist
+        We usually restrict ourselves to cases where the adj matrix is invertible and
+            eigenvectors do exist
+
+    Recent Work has considered alternative defn's of freq
+        i) use random walk laplacian normalization: L_norm = D^-1*L
+        ii) explicit optimization to choose a set of graph frequencies
+
+    Best approach to defn freqs for graphs in specific application remains = open question
+
+B) Representations
+
+C) Sampling
+    Problem of sampling on graphs is modeled on corresponding problem in DSP
+    Basic Idea:
+         i) Define class of signals
+             DSP ex) signals that are bandlimited to first K freqs of the DFT
+             GSP ex) signals that are bandlimited to first K freqs of the GFT
+        ii) Define necessary and sufficient conditons to reconstruct signals
+                in that class from its samples
+
+    Key Difference in DSP vs GSP sampling => lack of regular sampling patterns in GSP
+    This^ prevents us from defining the idea of sampling 'every other node'
+
+    Thus multiple approaches have been suggested to identify the most informative vertices
+        on a graph, so that these can be sampled.
+    In practice signals usually dont truly belong to the class they are assumed to (e.g.
+        signals usually arent truly bandlimmted), and their inclusion in the class cannot
+        be guarunteed. Thus the observed signals will be noisy and in general will not
+        belong to the pre-specified class
+    To address this^ problem, several methods approach the problem of sampling set selection
+        from an experiment design perspective.
+            Goal: identify set of vertices that minimizes some measure of worst case
+                   reconstruction error in cases where noise or model mismatch is present.
+
+
+D) Extending conventional signal processing to graph signals
+
+E) Graph Learning
+    We have thus far assumed the graph is given, or can be defined in a reasonabe way based
+    on the nature of the application
+        ex) communications network       <--> connectivity defines graph
+        ex) temperature sensor network   <--> edge weight is dec func of phyical  distance
+        ex) ML applications              <--> edge weight is dec func of distance in feature space
+
+    Recent work: goal is to learn graphs from data
+        Motivating scenario:
+         i) no reasonable initial graph exists OR
+        ii) it is desirable to modify a known graph (based on network connectivity for example)
+            by selecting weights derived from data
+        KEY IDEA: select a graph such that the most likely graph signals correspond to the lowest
+                  frequencies of the GFT
+    Remaining Challenges:
+    B/c graphs derived from data are essentially models, the 'right' graph model should be selected
+        based on
+        i) the # of parameters used
+        ii) its data fit
+        iii) its ability to provide useful interpretations
+
+4) APPLICATIONS
+A) Sensor Networks
+    graph ~ realtive positions of sensors in the environment
+    applications: compression, denoising, reconstruction, distrib processing of sensor data
+
+    first approach to define a graph associted to a sensor network
+        -choose edge weights as decreasing funcs of distance btwn nodes
+        -then data observatsions that are similar at neighborings nodes lead naturally to smooth (low freq)
+            graph signals
+        -Such a smooth graph signal model makes it possible to detece outliers or abnormal values by
+            high pass filtering & thresholding
+    another scenario: graphs to be used for data analysis
+    ex) urban data processing relies on data that naturally live on networks (energy, transport, road, etc)
+    In some cases relations btwn sensor readins are NOT exclusively explained by the distance between sensor
+        locations, or by some actual networks contraint. Other factors can influence that data values observed
+        at the sensor readings (think about weather data and a mountain range separating sensors OR measuring
+        pollution in a city and accounting for fact that some sensors are near freeways)
+
+D) Machine Learning and Data Science
+    Graph methods have played important role in ML applications
+        -provide natural way to represent the structure of the data set
+        -each vertex represents one data point to which a label can be associated
+        -edge weights = decreasing function of the distance between data points in the feature space
+    GSP then enables different types of processing, learning, or filtering operations on values associated to
+        graph vertices
+    In a different context, GSP elements can be helpfu to cnstruct architectures that are able to classify
+        signals that live on irregular structures
+    examples:
+    When data labels are prescribed as signals on a graph, graph signal regularization techniques can be used
+        -in the process of estimating labels
+        -optimizing the prediction of unkown labels in classification
+        -or semi-supervised learning problems
+    Graphs can also be constructed to describe the similarities between users or items in reccomendation systems
+        Leveraging notions of graph frequency and graph filters, classical collaborative filtering methods
+        (like k nearest neighbors strategies) can then be implemented with specific band-stop graph filters
+        on graphs
+    GSP framework can also be used to design architectures to analyze or classify whole graph signals that
+        orignally live on irregular structures
+    GSP toolbox used to extend CNN techniques to data defined on graphs
+    The CNN paradigm has been generalized with the help of GSP elements for the extraction of feature
+        descriptors for 3D shapes
+    While previous works mostly address the analyiss of 3D shapes, CNN's can actually be extended to many
+        other signals in high dimensional irregular domains
+            -social networks, brain connectomes, and word embeddings
+        by reformulation in the context of spectral graph theory.
+    Here^ the GSP framework leads to fast localized convolutional filters on graphs along witha adaptive pooling
+        operators
+    Deep network architechtures for graph signals have been tested in various application domains such as
+        - chemical molecule properties prediction
+        - classification tasks on social networks
+        - autism spectrum disorder classification
+        - traffic forecasting
 
 
 
+
+
+
+Quotes:
 
 "In particular, the graph Fourier transform allows us to develop the intuition gathered in the classical setting and extend it to graphs; we can talk about the notions of frequency and bandlimitedness, for example."
 
